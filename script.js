@@ -128,7 +128,9 @@ const grid = document.getElementById("productGrid");
 function renderProducts(list) {
   grid.innerHTML = "";
 
-  list.forEach((p, i) => {
+  list.forEach((p) => {
+    const realIndex = PRODUCTS.indexOf(p);
+
     grid.innerHTML += `
       <div class="product">
         <img src="${p.image}">
@@ -137,12 +139,13 @@ function renderProducts(list) {
 
         <div class="price-box">
           <strong>₹${p.lowest}</strong>
-          <button class="buy-btn" onclick="openBuy(${i})">Buy</button>
+          <button class="buy-btn" onclick="openBuy(${realIndex})">Buy</button>
         </div>
       </div>
     `;
   });
 }
+
 
 renderProducts(PRODUCTS);
 function openCategory(cat) {
