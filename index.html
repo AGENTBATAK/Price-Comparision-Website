@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Price Finder</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* =====================================================
+   GLOBAL THEME (Neon Cyber)
+===================================================== */
+:root{
+  --bg1:#051428;
+  --bg2:#0c2347;
+  --accent1:#00eaff;
+  --accent2:#9b4bff;
+  --glass:rgba(255,255,255,0.05);
+  --text:#e7f2ff;
+  --muted:#a8c4ff;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:"Poppins",sans-serif;
+  background:linear-gradient(120deg,var(--bg1),var(--bg2));
+  color:var(--text);
+  overflow-x:hidden;
+}
+section{display:none;}
+section.active{display:block;}
+
+/* NAVBAR */
+.nav{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 28px;background:rgba(255,255,255,0.03);
+  backdrop-filter:blur(12px);position:sticky;top:0;z-index:500;
+}
+.nav .brand{font-size:20px;font-weight:700;}
+.nav a{
+  margin-left:20px;color:var(--muted);font-weight:500;
+  cursor:pointer;text-decoration:none;
+}
+.nav a.active{color:white;font-weight:700;}
+
+/* FLOATING TEXT ROOT */
+#floatingRoot{
+  position:fixed;inset:0;pointer-events:none;z-index:2000;
+}
+.popText{
+  position:absolute;padding:8px 14px;border-radius:999px;
+  font-weight:700;font-size:14px;opacity:0;
+  animation:floatUp 4.8s linear forwards;
+  background:linear-gradient(135deg,
+     rgba(0,234,255,.35),
+     rgba(155,75,255,.35)
+  );
+}
+@keyframes floatUp{
+  0%{opacity:0;transform:translateY(20vh) scale(.85);}
+  12%{opacity:1;}
+  90%{opacity:1;}
+  100%{opacity:0;transform:translateY(-30vh) scale(1.1);}
+}
+
+/* BUTTONS */
+.btn{
+  padding:12px 18px;border-radius:12px;
+  font-weight:600;border:none;cursor:pointer;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent1),var(--accent2));
+  color:#071524;
+}
+.btn-ghost{
+  background:transparent;border:1px solid rgba(255,255,255,.12);
+  color:var(--muted);
+}
+
+/* LANDING PAGE */
+#landing{text-align:center;padding:80px 20px;}
+#landing h1{
+  font-size:50px;font-weight:800;
+  background:linear-gradient(90deg,var(--accent1),var(--accent2));
+  -webkit-background-clip:text;color:transparent;
+}
+#landing p{color:var(--muted);max-width:700px;margin:auto;}
+
+.cat-pill{
+  padding:8px 14px;border-radius:999px;background:var(--glass);
+  margin:4px;cursor:pointer;display:inline-block;
+  border:1px solid rgba(255,255,255,.08);
+}
+
+/* LOGIN */
+.auth-box{
+  max-width:360px;margin:40px auto;background:var(--glass);
+  padding:20px;border-radius:14px;
+}
+.auth-box input{
+  width:100%;margin:8px 0;padding:12px;border:none;
+  background:rgba(255,255,255,.07);border-radius:10px;color:white;
+}
+
+/* HOME */
+.card-row{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:18px;margin-top:20px;
+}
+.cat-card{
+  width:180px;padding:18px;text-align:center;border-radius:14px;
+  background:var(--glass);cursor:pointer;transition:.25s ease;
+}
+.cat-card:hover{transform:translateY(-4px);}
+
+/* PRODUCTS */
+.search-wrap{
+  display:flex;gap:10px;justify-content:center;margin:20px 0;
+}
+.search-wrap input{
+  width:360px;padding:12px;border-radius:12px;border:none;
+  background:rgba(255,255,255,.07);color:white;
+}
+
+.grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:24px;padding:20px;
+}
+.product{
+  background:var(--glass);padding:16px;border-radius:16px;
+  position:relative;padding-bottom:80px;
+}
+.product img{
+  width:100%;height:220px;object-fit:contain;border-radius:12px;
+}
+.price-box{
+  position:absolute;left:12px;right:12px;bottom:12px;
+  background:rgba(0,0,0,.35);backdrop-filter:blur(10px);
+  padding:12px;border-radius:12px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.buy-btn{
+  padding:10px 16px;border-radius:10px;border:none;
+  background:linear-gradient(135deg,var(--accent1),var(--accent2));
+  color:#071524;font-weight:700;cursor:pointer;
+}
+
+/* MODAL */
+.modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.65);
+  backdrop-filter:blur(10px);display:none;
+  justify-content:center;align-items:center;z-index:9000;
+}
+.modal.active{display:flex;}
+.modal-box{
+  width:420px;background:var(--glass);padding:20px;border-radius:16px;
+}
+.modal-box input,.modal-box textarea{
+  width:100%;padding:10px;margin:8px 0;
+  background:rgba(255,255,255,.06);border:none;border-radius:10px;color:white;
+}
+
+/* SUCCESS */
+#success{
+  position:fixed;inset:0;background:rgba(0,0,0,.65);
+  display:none;justify-content:center;align-items:center;z-index:9500;
+}
+#success.active{display:flex;}
+.success-box{
+  background:var(--glass);padding:24px;border-radius:16px;text-align:center;
+}
+
+#confetti{position:fixed;inset:0;pointer-events:none;}
+.confetti-piece{
+  position:fixed;width:10px;height:14px;border-radius:3px;
+  animation:fall linear forwards;
+}
+@keyframes fall{to{transform:translateY(110vh)rotate(720deg);}}
+</style>
+</head>
+
+<body>
+
+<!-- FLOATING POP TEXTS -->
+<div id="floatingRoot"></div>
+
+<!-- NAVIGATION -->
+<div class="nav">
+  <div class="brand">Smart Price Finder</div>
+  <div>
+    <a id="nav-landing" onclick="go('landing')">Home</a>
+    <a id="nav-home" onclick="go('home')">Category</a>
+    <a id="nav-products" onclick="go('products')">Products</a>
+    <a id="nav-about" onclick="go('about')">About</a>
+    <a id="nav-login" onclick="go('login')">Login</a>
+  </div>
+</div>
+
+<!-- LANDING -->
+<section id="landing" class="active">
+  <h1>🔍 Smart Price Finder</h1>
+  <p>Discover 50+ products. </p>
+
+  <button class="btn btn-primary" onclick="startNow()">Start Now →</button>
+
+  <div style="margin-top:20px">
+    <span class="cat-pill" onclick="openCategory('phone')">Phones</span>
+    <span class="cat-pill" onclick="openCategory('earbuds')">Earbuds</span>
+    <span class="cat-pill" onclick="openCategory('watch')">Watches</span>
+    <span class="cat-pill" onclick="openCategory('tablet')">Tablets</span>
+    <span class="cat-pill" onclick="openCategory('all')">All</span>
+  </div>
+</section>
+
+<!-- LOGIN -->
+<section id="login">
+  <div class="auth-box">
+    <h2>Login</h2>
+    <input id="email" placeholder="Email">
+    <input id="password" placeholder="Password (min 4)">
+    <button class="btn btn-primary" onclick="login()">Login</button>
+  </div>
+</section>
+
+<!-- HOME -->
+<section id="home">
+  <h2 style="text-align:center">Welcome</h2>
+  <p style="color:var(--muted);text-align:center">Choose a category</p>
+
+  <div class="card-row">
+    <div class="cat-card" onclick="openCategory('phone')">Phones</div>
+    <div class="cat-card" onclick="openCategory('earbuds')">Earbuds</div>
+    <div class="cat-card" onclick="openCategory('watch')">Watches</div>
+    <div class="cat-card" onclick="openCategory('tablet')">Tablets</div>
+    <div class="cat-card" onclick="openCategory('all')">All Products</div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div style="max-width:760px;margin:auto;background:var(--glass);padding:20px;border-radius:16px">
+    <h2>About Our Demo</h2>
+    <p style="color:var(--muted)">Smart Price Finder is a polished, user-friendly product browsing interface designed to showcase modern e-commerce UI features. It includes a curated catalog of 50 products along with smooth page transitions, responsive layouts, and an intuitive search experience.
+The platform also features a payment flow demonstration that simulates checkout behavior for UI and interaction testing without processing real payments.
+
+This project is ideal for demonstrating front-end design, interaction patterns, and modular code structure in a real-world shopping experience.</p>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section id="products">
+  <h2 style="text-align:center">Products</h2>
+
+  <div class="search-wrap">
+    <input id="searchInput" placeholder="Search product name, category, store..." oninput="searchLive()">
+    <button class="btn btn-primary" onclick="searchProducts()">Search</button>
+  </div>
+
+  <div id="productGrid" class="grid"></div>
+</section>
+
+<!-- BUY MODAL -->
+<div id="buyModal" class="modal" onclick="if(event.target===this) closeBuy()">
+  <div class="modal-box" id="buyBox"></div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div id="payModal" class="modal" onclick="if(event.target===this) closePay()">
+  <div class="modal-box">
+    <h3>Payment</h3>
+
+    <input id="payerName" placeholder="Full Name">
+    <textarea id="payerAddress" placeholder="Address"></textarea>
+    <input id="payerPhone" placeholder="Phone (10 digits)">
+
+    <button class="btn btn-primary" style="width:100%" onclick="submitPayment()">
+      Pay ₹<span id="payAmount">0</span>
+    </button>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div id="success" onclick="if(event.target===this) closeSuccess()">
+  <div class="success-box">
+    <h2>🎉 Payment Successful!</h2>
+    <p id="successInfo"></p>
+    <button class="btn btn-primary" onclick="closeSuccess()">Done</button>
+  </div>
+  <div id="confetti"></div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
